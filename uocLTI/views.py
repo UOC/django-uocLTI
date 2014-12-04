@@ -56,6 +56,13 @@ def launch_lti(request):
     user_id = get_lti_value('user_id', tool_provider, encoding=encoding)
     test = get_lti_value('context_title', tool_provider, encoding=encoding)
 
+    all_user_roles = []
+    if roles:
+        if not isinstance(roles, list): roles = (roles,)
+        all_user_roles += roles
+    if uoc_roles:
+        if not isinstance(uoc_roles, list): uoc_roles = (uoc_roles,)
+        all_user_roles += uoc_roles
     if not email or not user_id:
         if settings.LTI_DEBUG: print "Email and/or user_id wasn't found in post, return Permission Denied"
         raise PermissionDenied()    
@@ -67,14 +74,6 @@ def launch_lti(request):
             """ if roles is None, then setting for LTI_ROLES may be wrong, return 403 for user and print error to log """
             if settings.LTI_DEBUG: print "VELVET_ROLES is set but the roles for the user were not found.  Check that the setting for LTI_ROLES is correct."
             raise PermissionDenied()
-
-        all_user_roles = []
-        if roles:
-            if not isinstance(roles, list): roles = (roles,)
-            all_user_roles += roles
-        if uoc_roles:
-            if not isinstance(uoc_roles, list): uoc_roles = (uoc_roles,)
-            all_user_roles += uoc_roles
 
         is_role_allowed = [m for velvet_role in settings.VELVET_ROLES for m in all_user_roles if velvet_role.lower()==m.lower()]
 
